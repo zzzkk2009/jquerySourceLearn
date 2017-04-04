@@ -1,0 +1,24 @@
+{
+  "name": "@zzzkk2009/jquery-source-learn",
+  "version": "1.0.0",
+  "description": "jquery source learn",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzzkk2009/jquerySourceLearn.git"
+  },
+  "keywords": [
+    "jquery",
+    "source",
+    "learn"
+  ],
+  "author": "zzzkk2009",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zzzkk2009/jquerySourceLearn/issues"
+  },
+  "homepage": "https://github.com/zzzkk2009/jquerySourceLearn#readme"
+}
