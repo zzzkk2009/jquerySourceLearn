@@ -11,7 +11,135 @@
  *
  * Date: 2013-07-03T13:30Z
  */
+ /**
+  * window作为参数传进来的作用：
+  		1、因为window是顶层对象，查找较慢，通过参数直接引用，和局部变量一样，查找效率快
+  		2、通过参数传入，可以方便的对参数变量进行压缩
+  	undefined作为参数传进来的作用：
+  		1、undefined是window对象下的一个属性，在IE7-9中，可以给window.undefined = 'xx' 重新赋值，
+  		通过参数传入，可以有效防止外部修改
+  *
+  */
 (function( window, undefined ) {
+
+// Can't do this because several apps including ASP.NET trace
+// the stack via arguments.caller.callee and Firefox dies if
+// you try to trace through "use strict" call chains. (#13335)
+// Support: Firefox 18+
+//"use strict";
+	var
+	// A central reference to the root jQuery(document)
+	  //rootjQuery=jQuery(document)：1、定义变量方便压缩； 2、通过变量名能知道其值的用途，方便代码的维护
+		rootjQuery, 
+
+	// The deferred used on DOM ready
+		readyList,
+
+	// Support: IE9
+	// For `typeof xmlNode.method` instead of `xmlNode.method !== undefined`
+		//IE9下，判断xmlNode节点下的方法，直接和undefined比较会认为证据不充分，为了做到全兼容，最好通过typeof来判断
+		core_strundefined = typeof undefined,
+
+	// Use the correct document accordingly with window argument (sandbox)
+		//方便代码压缩
+		location = window.location,
+		document = window.document,
+		docElem = document.documentElement, //html节点
+
+	// Map over jQuery in case of overwrite
+		_jQuery = window.jQuery,
+
+	// Map over the $ in case of overwrite
+		_$ = window.$,
+
+	// [[Class]] -> type pairs
+		//class2type={ "[Object String]" : "string", "[Object Array]" : "array", ... }
+		class2type = {},
+
+	// List of deleted data cache ids, so we can reuse them
+		//在2.0版本后，jQuery的数据缓存改为面向对象的写法了，此处的core_deletedIds变量已经过时了。
+		core_deletedIds = [],
+
+		core_version = "2.0.3",
+
+	// Save a reference to some core methods
+		//一些数组和对象的方法常用方法存到局部变量上，方便后续的引用，和代码压缩
+		core_concat = core_deletedIds.concat,
+		core_push = core_deletedIds.push,
+		core_slice = core_deletedIds.slice,
+		core_indexOf = core_deletedIds.indexOf,
+		core_toString = class2type.toString,
+		core_hasOwn = class2type.hasOwnProperty,
+		core_trim = core_version.trim,
+
+	// Define a local copy of jQuery
+		jQuery = function( selector, context ) {
+			// The jQuery object is actually just the init constructor 'enhanced'
+			//调用jQuery函数后，便会返回jQuery对象，从而可以调用jQuery对象下的所有方法，实现面向对象编程
+			/**
+			 一般面向对象的写法：
+			 定义：
+			 	function Aaa(){}
+			 	Aaa.prototype.init = function(){}
+			 	Ass.prototype.css = function(){}
+			使用：
+				var a1 = new Aaa()
+				a1.init()
+				a1.css()
+
+				jQuery面向对象的实现
+					定义：
+					function jQuery = function(){
+						return new jQuery.prototype.init()
+					}
+					jQuery.prototype.init = function(){}
+					jQuery.prototype.css = function(){}
+					jQuery.prototype.init.prototype = jQuery.prototype
+
+					使用：
+						jQuery().css()
+			 
+			 */
+			return new jQuery.fn.init( selector, context, rootjQuery );
+		},
+
+	// Used for matching numbers
+		//匹配数字的正则：包括正负数、小数点，科学记数法等。后面的css()等会用到
+		core_pnum = /[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source,
+
+	// Used for splitting on whitespace
+		//匹配空格:分割英文单词用
+		core_rnotwhite = /\S+/g,
+
+	// A simple way to check for HTML strings
+	// Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
+	// Strict HTML recognition (#11290: must start with <)
+		//\s*(<[\w\W]+>)[^>]* ：匹配标签
+		//#([\w-]*)  ： 匹配id
+		//例如： <p>aaa 或者 #div1
+		rquickExpr = /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,
+
+	// Match a standalone tag
+		//例如： <p></p>  或 <div></div>等单标签
+		rsingleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/,
+
+	// Matches dashed string for camelizing
+		//-ms-transform   ->  MsTransform
+		rmsPrefix = /^-ms-/,
+		// -2d -> 2d   margin-left  -> marginLeft
+		rdashAlpha = /-([\da-z])/gi,
+
+	// Used by jQuery.camelCase as callback to replace()
+		fcamelCase = function( all, letter ) {
+			return letter.toUpperCase();
+		},
+
+	// The ready event handler and self cleanup method
+		completed = function() {
+			document.removeEventListener( "DOMContentLoaded", completed, false );
+			window.removeEventListener( "load", completed, false );
+			jQuery.ready();
+		};	
 
 jQuery.fn = jQuery.prototype = {
 	// The current version of jQuery being used
@@ -199,85 +327,6 @@ jQuery.fn = jQuery.prototype = {
 	splice: [].splice
 };
 
-// Can't do this because several apps including ASP.NET trace
-// the stack via arguments.caller.callee and Firefox dies if
-// you try to trace through "use strict" call chains. (#13335)
-// Support: Firefox 18+
-//"use strict";
-	var
-	// A central reference to the root jQuery(document)
-		rootjQuery,
-
-	// The deferred used on DOM ready
-		readyList,
-
-	// Support: IE9
-	// For `typeof xmlNode.method` instead of `xmlNode.method !== undefined`
-		core_strundefined = typeof undefined,
-
-	// Use the correct document accordingly with window argument (sandbox)
-		location = window.location,
-		document = window.document,
-		docElem = document.documentElement,
-
-	// Map over jQuery in case of overwrite
-		_jQuery = window.jQuery,
-
-	// Map over the $ in case of overwrite
-		_$ = window.$,
-
-	// [[Class]] -> type pairs
-		class2type = {},
-
-	// List of deleted data cache ids, so we can reuse them
-		core_deletedIds = [],
-
-		core_version = "2.0.3",
-
-	// Save a reference to some core methods
-		core_concat = core_deletedIds.concat,
-		core_push = core_deletedIds.push,
-		core_slice = core_deletedIds.slice,
-		core_indexOf = core_deletedIds.indexOf,
-		core_toString = class2type.toString,
-		core_hasOwn = class2type.hasOwnProperty,
-		core_trim = core_version.trim,
-
-	// Define a local copy of jQuery
-		jQuery = function( selector, context ) {
-			// The jQuery object is actually just the init constructor 'enhanced'
-			return new jQuery.fn.init( selector, context, rootjQuery );
-		},
-
-	// Used for matching numbers
-		core_pnum = /[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source,
-
-	// Used for splitting on whitespace
-		core_rnotwhite = /\S+/g,
-
-	// A simple way to check for HTML strings
-	// Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
-	// Strict HTML recognition (#11290: must start with <)
-		rquickExpr = /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,
-
-	// Match a standalone tag
-		rsingleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/,
-
-	// Matches dashed string for camelizing
-		rmsPrefix = /^-ms-/,
-		rdashAlpha = /-([\da-z])/gi,
-
-	// Used by jQuery.camelCase as callback to replace()
-		fcamelCase = function( all, letter ) {
-			return letter.toUpperCase();
-		},
-
-	// The ready event handler and self cleanup method
-		completed = function() {
-			document.removeEventListener( "DOMContentLoaded", completed, false );
-			window.removeEventListener( "load", completed, false );
-			jQuery.ready();
-		};
 
 // Give the init function the jQuery prototype for later instantiation
 jQuery.fn.init.prototype = jQuery.fn;

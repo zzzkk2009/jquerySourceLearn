@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+<body>
+
+<script src="jquery-2.0.3.js"></script>
+<script>
+	//constructor指向问题
+
+
+	function Aaa(){}
+//	console.log(a1.constructor)
+
+	Aaa.prototype.name = 'hello'
+	Aaa.prototype.age = 30
+
+	var a1 = new Aaa()
+
+	console.log(a1.constructor)
+
+	Aaa.prototype = {
+		name: 'hello',
+		age: 30
+	}
+
+	var a2 = new Aaa()
+
+	console.log(a2.constructor)
+
+	Aaa.prototype = {
+		constructor: Aaa,
+		name: 'hello',
+		age: 30
+	}
+
+	var a3 = new Aaa()
+
+	console.log(a3.constructor)
+
+
+
+</script>
+</body>
+</html>

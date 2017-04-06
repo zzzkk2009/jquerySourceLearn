@@ -5,6 +5,13 @@
 	(21, 94)  定义了一些变量和函数  jQuery = function(){}
 
 	(96, 283)  给JQ对象，添加一些方法和属性
+			init()
+				1、$(""), $(null), $(undefined), $(false)
+				2、选择(字符串类型)： $('#div1') $('.box') $('div') $('#div1 div.box')
+				3、创建(带左右尖括号)： $('<li>') $('<li>1</li><li>2</li>')
+				4、选择($(DOMElement)： $(this) $(document)
+				5、$(function(){})
+				6、$([]), $({})
 
 	(285, 347) extend: JQ的继承方法
 
